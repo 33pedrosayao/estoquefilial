@@ -8,3 +8,4 @@ python-dotenv==1.0.1
 pydantic==2.10.3
 cryptography==43.0.3
 python-multipart==0.0.12
+email-validator==2.2.0
