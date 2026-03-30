@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Controle de Estoque - Filial</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Tela de Login -->
+    <div id="login-container" class="login-container">
+        <div class="login-box">
+            <h1>📦 Sistema de Controle de Estoque</h1>
+            <p class="login-subtitle">Gerenciamento de Estoque da Filial</p>
+            
+            <form id="form-login" class="form">
+                <div class="form-group">
+                    <label for="login-email">Email:</label>
+                    <input type="email" id="login-email" placeholder="Email" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="login-senha">Senha:</label>
+                    <input type="password" id="login-senha" placeholder="Sua senha" required>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-login">Entrar</button>
+                
+                <p id="login-error" class="login-error"></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Dashboard Principal -->
+    <div id="dashboard-container" class="dashboard-container" style="display: none;">
+        <div class="container">
+            <!-- Header -->
+            <header class="header">
+                <div class="header-content">
+                    <h1>📦 Sistema de Controle de Estoque</h1>
+                    <p class="subtitle">Gerenciamento de Estoque da Filial</p>
+                </div>
+                <div class="header-user">
+                    <div class="user-info">
+                        <p id="user-name" class="user-name">Usuário</p>
+                        <p id="user-perfil" class="user-perfil">Perfil</p>
+                    </div>
+                    <button class="btn btn-secondary btn-logout" id="btn-logout">Sair</button>
+                </div>
+            </header>
+
+            <!-- Navigation Tabs -->
+            <nav class="tabs">
+                <button class="tab-btn active" data-tab="itens">Itens</button>
+                <button class="tab-btn" data-tab="movimentacoes">Movimentações</button>
+                <button class="tab-btn" data-tab="alertas">Alertas</button>
+                <button class="tab-btn" data-tab="categorias">Categorias</button>
+                <button class="tab-btn" data-tab="usuarios" id="tab-usuarios" style="display: none;">Usuários</button>
+            </nav>
+
+            <!-- Main Content -->
+            <main class="content">
+                <!-- Tab: Itens -->
+                <section id="itens-tab" class="tab-content active">
+                    <div class="section-header">
+                        <h2>Itens em Estoque</h2>
+                        <button class="btn btn-primary" id="btn-novo-item">+ Novo Item</button>
+                    </div>
+
+                    <!-- Filtros -->
+                    <div class="filters">
+                        <input type="text" id="filter-nome" placeholder="Filtrar por nome..." class="filter-input">
+                        <select id="filter-categoria" class="filter-select">
+                            <option value="">Todas as categorias</option>
+                        </select>
+                        <select id="filter-status" class="filter-select">
+                            <option value="">Todos os status</option>
+                            <option value="true">Ativo</option>
+                            <option value="false">Inativo</option>
+                        </select>
+                    </div>
+
+                    <!-- Tabela de Itens -->
+                    <div class="table-container">
+                        <table id="tabela-itens" class="table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nome</th>
+                                    <th>Categoria</th>
+                                    <th>Quantidade</th>
+                                    <th>Mínimo</th>
+                                    <th>Unidade</th>
+                                    <th>Status</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbody-itens">
+                                <tr><td colspan="8" class="loading">Carregando itens...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Tab: Movimentações -->
+                <section id="movimentacoes-tab" class="tab-content">
+                    <div class="section-header">
+                        <h2>Registrar Movimentação</h2>
+                    </div>
+
+                    <!-- Formulário de Movimentação -->
+                    <form id="form-movimentacao" class="form">
+                        <div class="form-group">
+                            <label for="mov-item">Item:</label>
+                            <select id="mov-item" required>
+                                <option value="">Selecione um item...</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="mov-tipo">Tipo:</label>
+                            <select id="mov-tipo" required>
+                                <option value="entrada">Entrada</option>
+                                <option value="saida">Saída</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="mov-quantidade">Quantidade:</label>
+                            <input type="number" id="mov-quantidade" min="1" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="mov-motivo">Motivo:</label>
+                            <input type="text" id="mov-motivo" placeholder="Ex: Consumo na copa">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="mov-usuario">Usuário:</label>
+                            <input type="text" id="mov-usuario" placeholder="Seu nome">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="mov-observacoes">Observações:</label>
+                            <textarea id="mov-observacoes" rows="3"></textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">Registrar Movimentação</button>
+                    </form>
+
+                    <!-- Histórico de Movimentações -->
+                    <div class="section-header" style="margin-top: 40px;">
+                        <h3>Histórico de Movimentações</h3>
+                    </div>
+
+                    <div class="table-container">
+                        <table id="tabela-movimentacoes" class="table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Item</th>
+                                    <th>Tipo</th>
+                                    <th>Quantidade</th>
+                                    <th>Motivo</th>
+                                    <th>Usuário</th>
+                                    <th>Data</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbody-movimentacoes">
+                                <tr><td colspan="7" class="loading">Carregando movimentações...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Tab: Alertas -->
+                <section id="alertas-tab" class="tab-content">
+                    <div class="section-header">
+                        <h2>Alertas de Estoque</h2>
+                    </div>
+
+                    <div id="alertas-container" class="alertas-container">
+                        <p class="loading">Carregando alertas...</p>
+                    </div>
+                </section>
+
+                <!-- Tab: Categorias -->
+                <section id="categorias-tab" class="tab-content">
+                    <div class="section-header">
+                        <h2>Categorias</h2>
+                    </div>
+
+                    <div id="categorias-container" class="categorias-container">
+                        <p class="loading">Carregando categorias...</p>
+                    </div>
+                </section>
+
+                <!-- Tab: Usuários (Apenas Admin) -->
+                <section id="usuarios-tab" class="tab-content">
+                    <div class="section-header">
+                        <h2>Gerenciar Usuários</h2>
+                        <button class="btn btn-primary" id="btn-novo-usuario">+ Novo Usuário</button>
+                    </div>
+
+                    <div class="table-container">
+                        <table id="tabela-usuarios" class="table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nome</th>
+                                    <th>Email</th>
+                                    <th>Perfil</th>
+                                    <th>Status</th>
+                                    <th>Último Acesso</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbody-usuarios">
+                                <tr><td colspan="7" class="loading">Carregando usuários...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <!-- Modal: Novo/Editar Item -->
+    <div id="modal-item" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 id="modal-title">Novo Item</h2>
+            <form id="form-item" class="form">
+                <div class="form-group">
+                    <label for="item-nome">Nome:</label>
+                    <input type="text" id="item-nome" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="item-categoria">Categoria:</label>
+                    <select id="item-categoria" required></select>
+                </div>
+
+                <div class="form-group">
+                    <label for="item-quantidade">Quantidade Atual:</label>
+                    <input type="number" id="item-quantidade" min="0" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="item-minima">Quantidade Mínima:</label>
+                    <input type="number" id="item-minima" min="0" value="5" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="item-unidade">Unidade:</label>
+                    <input type="text" id="item-unidade" value="unidade" required>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Salvar Item</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Novo/Editar Usuário -->
+    <div id="modal-usuario" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 id="modal-usuario-title">Novo Usuário</h2>
+            <form id="form-usuario" class="form">
+                <div class="form-group">
+                    <label for="usuario-nome">Nome:</label>
+                    <input type="text" id="usuario-nome" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="usuario-email">Email:</label>
+                    <input type="email" id="usuario-email" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="usuario-senha">Senha:</label>
+                    <input type="password" id="usuario-senha" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="usuario-perfil">Perfil:</label>
+                    <select id="usuario-perfil" required>
+                        <option value="">Selecione um perfil...</option>
+                        <option value="1">Admin</option>
+                        <option value="2">Gerente</option>
+                        <option value="3">Operacional</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Salvar Usuário</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
