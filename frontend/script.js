@@ -20,10 +20,11 @@ const tabContents = document.querySelectorAll('.tab-content');
 const tabUsuarios = document.getElementById('tab-usuarios');
 
 function atualizarOpcoesQuantidade() {
-    const tipo = document.getElementById('mov-tipo').value;
+    const tipoEl = document.getElementById('mov-tipo');
     const select = document.getElementById('mov-quantidade');
-    const max = tipo === 'entrada' ? 100 : 10;
-    select.innerHTML = '';
+    if (!tipoEl || !select) return;
+    const max = tipoEl.value === 'entrada' ? 100 : 10;
+    select.innerHTML = '<option value="">Selecione quantidade...</option>';
     for (let i = 1; i <= max; i++) {
         const opt = document.createElement('option');
         opt.value = i;
@@ -630,5 +631,9 @@ function mudarTab(tabName, e) {
 
     if (e?.currentTarget) {
         e.currentTarget.classList.add('active');
+    }
+
+    if (tabName === 'movimentacoes') {
+        atualizarOpcoesQuantidade();
     }
 }
