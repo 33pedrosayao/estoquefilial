@@ -19,9 +19,23 @@ const tabBtns = document.querySelectorAll('.tab-btn');
 const tabContents = document.querySelectorAll('.tab-content');
 const tabUsuarios = document.getElementById('tab-usuarios');
 
+function atualizarOpcoesQuantidade() {
+    const tipo = document.getElementById('mov-tipo').value;
+    const select = document.getElementById('mov-quantidade');
+    const max = tipo === 'entrada' ? 100 : 10;
+    select.innerHTML = '';
+    for (let i = 1; i <= max; i++) {
+        const opt = document.createElement('option');
+        opt.value = i;
+        opt.textContent = i;
+        select.appendChild(opt);
+    }
+}
+
 // Inicialização
 document.addEventListener('DOMContentLoaded', () => {
     inicializarEventos();
+    atualizarOpcoesQuantidade();
     verificarAutenticacao();
 });
 
@@ -146,19 +160,6 @@ function inicializarEventos() {
     document.getElementById('form-item').addEventListener('submit', salvarItem);
     document.getElementById('form-movimentacao').addEventListener('submit', registrarMovimentacao);
 
-    function atualizarOpcoesQuantidade() {
-        const tipo = document.getElementById('mov-tipo').value;
-        const select = document.getElementById('mov-quantidade');
-        const max = tipo === 'entrada' ? 100 : 10;
-        select.innerHTML = '';
-        for (let i = 1; i <= max; i++) {
-            const opt = document.createElement('option');
-            opt.value = i;
-            opt.textContent = i;
-            select.appendChild(opt);
-        }
-    }
-    atualizarOpcoesQuantidade();
     document.getElementById('mov-tipo').addEventListener('change', atualizarOpcoesQuantidade);
     document.getElementById('form-usuario').addEventListener('submit', salvarUsuario);
 
@@ -430,6 +431,7 @@ async function registrarMovimentacao(e) {
         });
 
         document.getElementById('form-movimentacao').reset();
+        atualizarOpcoesQuantidade();
         await carregarItens();
         await carregarAlertas();
         await carregarHistoricoMovimentacoes();
