@@ -1,7 +1,10 @@
 from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, Text, Enum, JSON
 from sqlalchemy.orm import relationship
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 import enum
+
+def now_br():
+    return datetime.now(timezone(timedelta(hours=-3))).replace(tzinfo=None)
 
 from app.database.connection import Base
 
@@ -20,7 +23,7 @@ class Categoria(Base):
     id = Column(Integer, primary_key=True, index=True)
     nome = Column(String(100), unique=True, nullable=False)
     descricao = Column(Text, nullable=True)
-    criado_em = Column(DateTime, default=datetime.utcnow)
+    criado_em = Column(DateTime, default=now_br)
 
     itens = relationship("Item", back_populates="categoria")
 
@@ -33,8 +36,8 @@ class Item(Base):
     quantidade_minima = Column(Integer, default=5)
     unidade = Column(String(20), default="unidade")
     ativo = Column(Boolean, default=True, index=True)
-    criado_em = Column(DateTime, default=datetime.utcnow)
-    atualizado_em = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    criado_em = Column(DateTime, default=now_br)
+    atualizado_em = Column(DateTime, default=now_br, onupdate=now_br)
 
     categoria = relationship("Categoria", back_populates="itens")
     movimentacoes = relationship("Movimentacao", back_populates="item")
@@ -48,7 +51,7 @@ class Movimentacao(Base):
     quantidade = Column(Integer, nullable=False)
     motivo = Column(String(200), nullable=True)
     usuario = Column(String(100), nullable=True)
-    data_movimentacao = Column(DateTime, default=datetime.utcnow)
+    data_movimentacao = Column(DateTime, default=now_br)
     observacoes = Column(Text, nullable=True)
 
     item = relationship("Item", back_populates="movimentacoes")
@@ -59,7 +62,7 @@ class Alerta(Base):
     item_id = Column(Integer, ForeignKey("itens.id"), nullable=False)
     tipo_alerta = Column(Enum(TipoAlerta), nullable=False)
     ativo = Column(Boolean, default=True)
-    criado_em = Column(DateTime, default=datetime.utcnow)
+    criado_em = Column(DateTime, default=now_br)
 
     item = relationship("Item", back_populates="alertas")
 
@@ -68,7 +71,7 @@ class Perfil(Base):
     id = Column(Integer, primary_key=True, index=True)
     nome = Column(String(50), unique=True, nullable=False)
     descricao = Column(Text, nullable=True)
-    criado_em = Column(DateTime, default=datetime.utcnow)
+    criado_em = Column(DateTime, default=now_br)
 
     usuarios = relationship("Usuario", back_populates="perfil")
 
@@ -80,8 +83,8 @@ class Usuario(Base):
     senha_hash = Column(String(255), nullable=False)
     perfil_id = Column(Integer, ForeignKey("perfis.id"), nullable=False)
     ativo = Column(Boolean, default=True, index=True)
-    criado_em = Column(DateTime, default=datetime.utcnow)
-    atualizado_em = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    criado_em = Column(DateTime, default=now_br)
+    atualizado_em = Column(DateTime, default=now_br, onupdate=now_br)
     ultimo_acesso = Column(DateTime, nullable=True)
 
     perfil = relationship("Perfil", back_populates="usuarios")
@@ -95,6 +98,6 @@ class Auditoria(Base):
     registro_id = Column(Integer, nullable=True)
     detalhes = Column(JSON, nullable=True)
     ip_address = Column(String(45), nullable=True)
-    criado_em = Column(DateTime, default=datetime.utcnow, index=True)
+    criado_em = Column(DateTime, default=now_br, index=True)
 
     usuario = relationship("Usuario")
