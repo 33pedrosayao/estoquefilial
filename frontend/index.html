@@ -56,6 +56,7 @@
                 <button class="tab-btn" data-tab="alertas">Alertas</button>
                 <button class="tab-btn" data-tab="categorias">Categorias</button>
                 <button class="tab-btn" data-tab="usuarios" id="tab-usuarios" style="display: none;">Usuários</button>
+                <button class="tab-btn" data-tab="relatorio">Relatório</button>
             </nav>
 
             <!-- Main Content -->
@@ -336,6 +337,59 @@
                         </table>
                     </div>
                 </section>
+                <!-- Tab: Relatório -->
+                <section id="relatorio-tab" class="tab-content">
+                    <div class="section-header">
+                        <h2>Relatório de Estoque</h2>
+                    </div>
+
+                    <div class="filters" style="align-items: flex-end; gap: 12px;">
+                        <div class="form-group" style="margin: 0;">
+                            <label for="rel-inicio">Data Início:</label>
+                            <input type="date" id="rel-inicio" class="filter-input">
+                        </div>
+                        <div class="form-group" style="margin: 0;">
+                            <label for="rel-fim">Data Fim:</label>
+                            <input type="date" id="rel-fim" class="filter-input">
+                        </div>
+                        <button class="btn btn-primary" id="btn-gerar-relatorio">Gerar Relatório</button>
+                        <button class="btn btn-secondary" id="btn-exportar-csv" style="display:none;">Exportar CSV</button>
+                    </div>
+
+                    <div id="relatorio-resumo" style="display:none; margin: 20px 0; display: none;">
+                        <div style="display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 20px;">
+                            <div class="categoria-card" style="flex:1; min-width:150px; text-align:center;">
+                                <p style="margin:0; color:#888; font-size:13px;">Total Entradas</p>
+                                <h2 id="res-entradas" style="margin:4px 0; color:#4caf50;">0</h2>
+                            </div>
+                            <div class="categoria-card" style="flex:1; min-width:150px; text-align:center;">
+                                <p style="margin:0; color:#888; font-size:13px;">Total Saídas</p>
+                                <h2 id="res-saidas" style="margin:4px 0; color:#f44336;">0</h2>
+                            </div>
+                            <div class="categoria-card" style="flex:1; min-width:150px; text-align:center;">
+                                <p style="margin:0; color:#888; font-size:13px;">Itens com Movimentação</p>
+                                <h2 id="res-itens" style="margin:4px 0;">0</h2>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="table-container" id="relatorio-tabela-container" style="display:none;">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Item</th>
+                                    <th>Categoria</th>
+                                    <th>Unidade</th>
+                                    <th>Entradas</th>
+                                    <th>Saídas</th>
+                                    <th>Estoque Atual</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbody-relatorio"></tbody>
+                        </table>
+                    </div>
+                </section>
+
             </main>
         </div>
     </div>

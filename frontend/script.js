@@ -36,6 +36,7 @@ function atualizarOpcoesQuantidade() {
 // Inicialização
 document.addEventListener('DOMContentLoaded', () => {
     inicializarEventos();
+    inicializarRelatorio();
     atualizarOpcoesQuantidade();
     verificarAutenticacao();
 });
@@ -636,4 +637,81 @@ function mudarTab(tabName, e) {
     if (tabName === 'movimentacoes') {
         atualizarOpcoesQuantidade();
     }
+}
+
+// ===== RELATÓRIO =====
+let dadosRelatorio = [];
+
+function inicializarRelatorio() {
+    const hoje = new Date().toISOString().split('T')[0];
+    const inicioMes = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0];
+    document.getElementById('rel-inicio').value = inicioMes;
+    document.getElementById('rel-fim').value = hoje;
+
+    document.getElementById('btn-gerar-relatorio').addEventListener('click', gerarRelatorio);
+    document.getElementById('btn-exportar-csv').addEventListener('click', exportarCSV);
+}
+
+async function gerarRelatorio() {
+    const inicio = document.getElementById('rel-inicio').value;
+    const fim = document.getElementById('rel-fim').value;
+
+    if (!inicio || !fim) {
+        alert('Selecione o período do relatório.');
+        return;
+    }
+
+    try {
+        dadosRelatorio = await fazerRequisicao(`${API_URL}/itens/relatorio/?data_inicio=${inicio}&data_fim=${fim}`);
+        renderizarRelatorio(dadosRelatorio, inicio, fim);
+    } catch (erro) {
+        alert('Erro ao gerar relatório: ' + erro.message);
+    }
+}
+
+function renderizarRelatorio(dados, inicio, fim) {
+    const totalEntradas = dados.reduce((s, r) => s + r.entradas, 0);
+    const totalSaidas = dados.reduce((s, r) => s + r.saidas, 0);
+    const itensComMov = dados.filter(r => r.entradas > 0 || r.saidas > 0).length;
+
+    document.getElementById('res-entradas').textContent = totalEntradas;
+    document.getElementById('res-saidas').textContent = totalSaidas;
+    document.getElementById('res-itens').textContent = itensComMov;
+    document.getElementById('relatorio-resumo').style.display = 'block';
+
+    const tbody = document.getElementById('tbody-relatorio');
+    tbody.innerHTML = dados.map(r => `
+        <tr>
+            <td>${r.nome}</td>
+            <td>${r.categoria}</td>
+            <td>${r.unidade}</td>
+            <td style="color:#4caf50; font-weight:bold;">${r.entradas}</td>
+            <td style="color:#f44336; font-weight:bold;">${r.saidas}</td>
+            <td><strong>${r.estoque_atual}</strong></td>
+        </tr>
+    `).join('');
+
+    document.getElementById('relatorio-tabela-container').style.display = 'block';
+    document.getElementById('btn-exportar-csv').style.display = 'inline-block';
+}
+
+function exportarCSV() {
+    if (!dadosRelatorio.length) return;
+
+    const inicio = document.getElementById('rel-inicio').value;
+    const fim = document.getElementById('rel-fim').value;
+
+    const linhas = [
+        ['Item', 'Categoria', 'Unidade', 'Entradas', 'Saídas', 'Estoque Atual'],
+        ...dadosRelatorio.map(r => [r.nome, r.categoria, r.unidade, r.entradas, r.saidas, r.estoque_atual])
+    ];
+
+    const csv = linhas.map(l => l.join(',')).join('\n');
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `relatorio_${inicio}_${fim}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
 }

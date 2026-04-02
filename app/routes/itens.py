@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 from app.database.connection import get_db
 from app.models.models import Item, Categoria, Movimentacao, Alerta, TipoMovimentacao, TipoAlerta
 from app.schemas.schemas import (
@@ -7,6 +8,7 @@ from app.schemas.schemas import (
     MovimentacaoCreate, MovimentacaoResponse,
     CategoriaResponse
 )
+from datetime import datetime
 
 router = APIRouter(prefix="/api/itens", tags=["itens"])
 
@@ -157,3 +159,55 @@ def verificar_alertas(item: Item, db: Session):
 @router.get("/categorias/", response_model=list[CategoriaResponse])
 def listar_categorias(db: Session = Depends(get_db)):
     return db.query(Categoria).all()
+
+@router.get("/relatorio/")
+def gerar_relatorio(
+    data_inicio: str = Query(..., description="Data início (YYYY-MM-DD)"),
+    data_fim: str = Query(..., description="Data fim (YYYY-MM-DD)"),
+    db: Session = Depends(get_db)
+):
+    try:
+        inicio = datetime.strptime(data_inicio, "%Y-%m-%d")
+        fim = datetime.strptime(data_fim, "%Y-%m-%d").replace(hour=23, minute=59, second=59)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Formato de data inválido. Use YYYY-MM-DD")
+
+    entradas = db.query(
+        Movimentacao.item_id,
+        func.sum(Movimentacao.quantidade).label("total")
+    ).filter(
+        Movimentacao.tipo == TipoMovimentacao.entrada,
+        Movimentacao.data_movimentacao >= inicio,
+        Movimentacao.data_movimentacao <= fim
+    ).group_by(Movimentacao.item_id).all()
+
+    saidas = db.query(
+        Movimentacao.item_id,
+        func.sum(Movimentacao.quantidade).label("total")
+    ).filter(
+        Movimentacao.tipo == TipoMovimentacao.saida,
+        Movimentacao.data_movimentacao >= inicio,
+        Movimentacao.data_movimentacao <= fim
+    ).group_by(Movimentacao.item_id).all()
+
+    entradas_map = {r.item_id: r.total for r in entradas}
+    saidas_map = {r.item_id: r.total for r in saidas}
+
+    itens_ativos = db.query(Item).filter(Item.ativo == True).all()
+
+    resultado = []
+    for item in itens_ativos:
+        ent = entradas_map.get(item.id, 0)
+        sai = saidas_map.get(item.id, 0)
+        resultado.append({
+            "item_id": item.id,
+            "nome": item.nome,
+            "categoria": item.categoria.nome if item.categoria else "-",
+            "unidade": item.unidade,
+            "entradas": ent,
+            "saidas": sai,
+            "estoque_atual": item.quantidade_atual,
+        })
+
+    resultado.sort(key=lambda x: x["nome"])
+    return resultado
