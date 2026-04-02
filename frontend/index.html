@@ -353,40 +353,55 @@
                             <input type="date" id="rel-fim" class="filter-input">
                         </div>
                         <button class="btn btn-primary" id="btn-gerar-relatorio">Gerar Relatório</button>
-                        <button class="btn btn-secondary" id="btn-exportar-csv" style="display:none;">Exportar CSV</button>
                     </div>
 
-                    <div id="relatorio-resumo" style="display:none; margin: 20px 0; display: none;">
-                        <div style="display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 20px;">
-                            <div class="categoria-card" style="flex:1; min-width:150px; text-align:center;">
-                                <p style="margin:0; color:#888; font-size:13px;">Total Entradas</p>
-                                <h2 id="res-entradas" style="margin:4px 0; color:#4caf50;">0</h2>
+                    <!-- Área do relatório gerado -->
+                    <div id="relatorio-resultado" style="display:none; margin-top: 24px;">
+
+                        <!-- Cabeçalho visual do relatório -->
+                        <div class="relatorio-header-visual">
+                            <div>
+                                <h3 id="relatorio-titulo">Relatório de Estoque</h3>
+                                <p id="relatorio-periodo" style="color:#888; font-size:13px;"></p>
                             </div>
-                            <div class="categoria-card" style="flex:1; min-width:150px; text-align:center;">
-                                <p style="margin:0; color:#888; font-size:13px;">Total Saídas</p>
-                                <h2 id="res-saidas" style="margin:4px 0; color:#f44336;">0</h2>
-                            </div>
-                            <div class="categoria-card" style="flex:1; min-width:150px; text-align:center;">
-                                <p style="margin:0; color:#888; font-size:13px;">Itens com Movimentação</p>
-                                <h2 id="res-itens" style="margin:4px 0;">0</h2>
+                            <div style="display:flex; gap:8px;">
+                                <button class="btn btn-secondary" id="btn-exportar-csv">Exportar CSV</button>
+                                <button class="btn btn-primary" id="btn-exportar-pdf">Exportar PDF</button>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="table-container" id="relatorio-tabela-container" style="display:none;">
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>Item</th>
-                                    <th>Categoria</th>
-                                    <th>Unidade</th>
-                                    <th>Entradas</th>
-                                    <th>Saídas</th>
-                                    <th>Estoque Atual</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tbody-relatorio"></tbody>
-                        </table>
+                        <!-- Cards de resumo -->
+                        <div class="relatorio-resumo-cards">
+                            <div class="relatorio-card relatorio-card-entrada">
+                                <p class="relatorio-card-label">Total Entradas</p>
+                                <h2 id="res-entradas">0</h2>
+                            </div>
+                            <div class="relatorio-card relatorio-card-saida">
+                                <p class="relatorio-card-label">Total Saídas</p>
+                                <h2 id="res-saidas">0</h2>
+                            </div>
+                            <div class="relatorio-card">
+                                <p class="relatorio-card-label">Itens com Movimentação</p>
+                                <h2 id="res-itens">0</h2>
+                            </div>
+                        </div>
+
+                        <!-- Tabela -->
+                        <div class="table-container">
+                            <table class="table" id="tabela-relatorio-print">
+                                <thead>
+                                    <tr>
+                                        <th>Item</th>
+                                        <th>Categoria</th>
+                                        <th>Unidade</th>
+                                        <th>Entradas</th>
+                                        <th>Saídas</th>
+                                        <th>Estoque Atual</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbody-relatorio"></tbody>
+                            </table>
+                        </div>
                     </div>
                 </section>
 

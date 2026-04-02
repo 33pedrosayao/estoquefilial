@@ -650,6 +650,7 @@ function inicializarRelatorio() {
 
     document.getElementById('btn-gerar-relatorio').addEventListener('click', gerarRelatorio);
     document.getElementById('btn-exportar-csv').addEventListener('click', exportarCSV);
+    document.getElementById('btn-exportar-pdf').addEventListener('click', exportarPDF);
 }
 
 async function gerarRelatorio() {
@@ -674,10 +675,13 @@ function renderizarRelatorio(dados, inicio, fim) {
     const totalSaidas = dados.reduce((s, r) => s + r.saidas, 0);
     const itensComMov = dados.filter(r => r.entradas > 0 || r.saidas > 0).length;
 
+    const fmtData = d => d.split('-').reverse().join('/');
+    document.getElementById('relatorio-titulo').textContent = 'Relatório de Estoque';
+    document.getElementById('relatorio-periodo').textContent = `Período: ${fmtData(inicio)} a ${fmtData(fim)}`;
+
     document.getElementById('res-entradas').textContent = totalEntradas;
     document.getElementById('res-saidas').textContent = totalSaidas;
     document.getElementById('res-itens').textContent = itensComMov;
-    document.getElementById('relatorio-resumo').style.display = 'block';
 
     const tbody = document.getElementById('tbody-relatorio');
     tbody.innerHTML = dados.map(r => `
@@ -685,14 +689,72 @@ function renderizarRelatorio(dados, inicio, fim) {
             <td>${r.nome}</td>
             <td>${r.categoria}</td>
             <td>${r.unidade}</td>
-            <td style="color:#4caf50; font-weight:bold;">${r.entradas}</td>
-            <td style="color:#f44336; font-weight:bold;">${r.saidas}</td>
+            <td class="relatorio-entrada">${r.entradas}</td>
+            <td class="relatorio-saida">${r.saidas}</td>
             <td><strong>${r.estoque_atual}</strong></td>
         </tr>
     `).join('');
 
-    document.getElementById('relatorio-tabela-container').style.display = 'block';
-    document.getElementById('btn-exportar-csv').style.display = 'inline-block';
+    document.getElementById('relatorio-resultado').style.display = 'block';
+}
+
+function exportarPDF() {
+    const inicio = document.getElementById('rel-inicio').value;
+    const fim = document.getElementById('rel-fim').value;
+    const fmtData = d => d.split('-').reverse().join('/');
+
+    const totalEntradas = document.getElementById('res-entradas').textContent;
+    const totalSaidas = document.getElementById('res-saidas').textContent;
+    const itensComMov = document.getElementById('res-itens').textContent;
+
+    const linhas = [...document.querySelectorAll('#tbody-relatorio tr')].map(tr =>
+        [...tr.querySelectorAll('td')].map(td => `<td>${td.innerText}</td>`).join('')
+    ).map(l => `<tr>${l}</tr>`).join('');
+
+    const html = `
+        <!DOCTYPE html>
+        <html lang="pt-BR">
+        <head>
+            <meta charset="UTF-8">
+            <title>Relatório de Estoque</title>
+            <style>
+                body { font-family: Arial, sans-serif; padding: 32px; color: #222; }
+                h1 { font-size: 22px; margin-bottom: 4px; }
+                .periodo { color: #666; font-size: 13px; margin-bottom: 24px; }
+                .cards { display: flex; gap: 16px; margin-bottom: 24px; }
+                .card { border: 1px solid #ddd; border-radius: 8px; padding: 16px 24px; flex: 1; text-align: center; }
+                .card p { margin: 0; font-size: 12px; color: #888; }
+                .card h2 { margin: 4px 0; font-size: 28px; }
+                .entrada { color: #4caf50; }
+                .saida { color: #f44336; }
+                table { width: 100%; border-collapse: collapse; font-size: 13px; }
+                th { background: #667eea; color: white; padding: 10px; text-align: left; }
+                td { padding: 8px 10px; border-bottom: 1px solid #eee; }
+                tr:nth-child(even) { background: #f9f9f9; }
+                @media print { body { padding: 16px; } }
+            </style>
+        </head>
+        <body>
+            <h1>Relatório de Estoque</h1>
+            <p class="periodo">Período: ${fmtData(inicio)} a ${fmtData(fim)}</p>
+            <div class="cards">
+                <div class="card"><p>Total Entradas</p><h2 class="entrada">${totalEntradas}</h2></div>
+                <div class="card"><p>Total Saídas</p><h2 class="saida">${totalSaidas}</h2></div>
+                <div class="card"><p>Itens com Movimentação</p><h2>${itensComMov}</h2></div>
+            </div>
+            <table>
+                <thead><tr><th>Item</th><th>Categoria</th><th>Unidade</th><th>Entradas</th><th>Saídas</th><th>Estoque Atual</th></tr></thead>
+                <tbody>${linhas}</tbody>
+            </table>
+        </body>
+        </html>
+    `;
+
+    const janela = window.open('', '_blank');
+    janela.document.write(html);
+    janela.document.close();
+    janela.focus();
+    setTimeout(() => janela.print(), 500);
 }
 
 function exportarCSV() {
