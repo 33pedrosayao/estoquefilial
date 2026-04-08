@@ -652,7 +652,7 @@ function preencherSelectCategoriasRelatorio() {
     sel.innerHTML = '<option value="">Todas</option>';
     categorias.forEach(cat => {
         const opt = document.createElement('option');
-        opt.value = cat.nome;
+        opt.value = cat.id;
         opt.textContent = cat.nome;
         sel.appendChild(opt);
     });
@@ -672,7 +672,10 @@ function inicializarRelatorio() {
 async function gerarRelatorio() {
     const inicio = document.getElementById('rel-inicio').value;
     const fim = document.getElementById('rel-fim').value;
-    const categoria = document.getElementById('rel-categoria').value;
+    const categoriaId = document.getElementById('rel-categoria').value;
+    const categoriaNome = categoriaId
+        ? document.getElementById('rel-categoria').selectedOptions[0].textContent
+        : '';
 
     if (!inicio || !fim) {
         alert('Selecione o período do relatório.');
@@ -680,9 +683,10 @@ async function gerarRelatorio() {
     }
 
     try {
-        const todos = await fazerRequisicao(`${API_URL}/itens/relatorio/?data_inicio=${inicio}&data_fim=${fim}`);
-        dadosRelatorio = categoria ? todos.filter(r => r.categoria === categoria) : todos;
-        renderizarRelatorio(dadosRelatorio, inicio, fim, categoria);
+        let url = `${API_URL}/itens/relatorio/?data_inicio=${inicio}&data_fim=${fim}`;
+        if (categoriaId) url += `&categoria_id=${categoriaId}`;
+        dadosRelatorio = await fazerRequisicao(url);
+        renderizarRelatorio(dadosRelatorio, inicio, fim, categoriaNome);
     } catch (erro) {
         alert('Erro ao gerar relatório: ' + erro.message);
     }
@@ -720,9 +724,10 @@ function renderizarRelatorio(dados, inicio, fim, categoria) {
 function exportarPDF() {
     const inicio = document.getElementById('rel-inicio').value;
     const fim = document.getElementById('rel-fim').value;
-    const categoria = document.getElementById('rel-categoria').value;
+    const selCatPdf = document.getElementById('rel-categoria');
+    const nomeCategoriaPdf = selCatPdf.value ? selCatPdf.selectedOptions[0].textContent : '';
     const fmtData = d => d.split('-').reverse().join('/');
-    const titulo = categoria ? `Relatório de Estoque — ${categoria}` : 'Relatório de Estoque';
+    const titulo = nomeCategoriaPdf ? `Relatório de Estoque — ${nomeCategoriaPdf}` : 'Relatório de Estoque';
 
     const totalEntradas = document.getElementById('res-entradas').textContent;
     const totalSaidas = document.getElementById('res-saidas').textContent;
@@ -794,8 +799,9 @@ function exportarCSV() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    const categoria = document.getElementById('rel-categoria').value;
-    const sufixo = categoria ? `_${categoria.toLowerCase()}` : '';
+    const selCat = document.getElementById('rel-categoria');
+    const nomeCategoria = selCat.value ? selCat.selectedOptions[0].textContent : '';
+    const sufixo = nomeCategoria ? `_${nomeCategoria.toLowerCase()}` : '';
     a.download = `relatorio${sufixo}_${inicio}_${fim}.csv`;
     document.body.appendChild(a);
     a.click();

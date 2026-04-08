@@ -164,6 +164,7 @@ def listar_categorias(db: Session = Depends(get_db)):
 def gerar_relatorio(
     data_inicio: str = Query(..., description="Data início (YYYY-MM-DD)"),
     data_fim: str = Query(..., description="Data fim (YYYY-MM-DD)"),
+    categoria_id: int = Query(None),
     db: Session = Depends(get_db)
 ):
     try:
@@ -193,7 +194,10 @@ def gerar_relatorio(
     entradas_map = {r.item_id: r.total for r in entradas}
     saidas_map = {r.item_id: r.total for r in saidas}
 
-    itens_ativos = db.query(Item).filter(Item.ativo == True).all()
+    query_itens = db.query(Item).filter(Item.ativo == True)
+    if categoria_id:
+        query_itens = query_itens.filter(Item.categoria_id == categoria_id)
+    itens_ativos = query_itens.all()
 
     resultado = []
     for item in itens_ativos:
