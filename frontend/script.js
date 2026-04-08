@@ -422,8 +422,7 @@ async function registrarMovimentacao(e) {
         tipo: document.getElementById('mov-tipo').value,
         quantidade: parseInt(document.getElementById('mov-quantidade').value),
         motivo: document.getElementById('mov-motivo').value,
-        usuario: document.getElementById('mov-usuario').value,
-        observacoes: document.getElementById('mov-observacoes').value
+        usuario: document.getElementById('mov-usuario').value
     };
 
     try {
