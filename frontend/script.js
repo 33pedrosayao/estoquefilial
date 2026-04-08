@@ -641,11 +641,26 @@ function mudarTab(tabName, e) {
 // ===== RELATÓRIO =====
 let dadosRelatorio = [];
 
-function inicializarRelatorio() {
+async function inicializarRelatorio() {
     const hoje = new Date().toISOString().split('T')[0];
     const inicioMes = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0];
     document.getElementById('rel-inicio').value = inicioMes;
     document.getElementById('rel-fim').value = hoje;
+
+    // Popular categorias dinamicamente a partir da API
+    try {
+        const categorias = await fazerRequisicao(`${API_URL}/itens/categorias/`);
+        const sel = document.getElementById('rel-categoria');
+        sel.innerHTML = '<option value="">Todas</option>';
+        categorias.forEach(cat => {
+            const opt = document.createElement('option');
+            opt.value = cat.nome;
+            opt.textContent = cat.nome;
+            sel.appendChild(opt);
+        });
+    } catch (e) {
+        // mantém as opções fixas se a API falhar
+    }
 
     document.getElementById('btn-gerar-relatorio').addEventListener('click', gerarRelatorio);
     document.getElementById('btn-exportar-csv').addEventListener('click', exportarCSV);
