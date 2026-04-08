@@ -235,10 +235,10 @@ async function carregarItens() {
 async function carregarCategorias() {
     try {
         categorias = await fazerRequisicao(`${API_URL}/itens/categorias/`);
-        preencherSelectCategorias();
-        preencherFiltroCategorias();
-        renderizarCategorias();
-        preencherSelectCategoriasRelatorio();
+        try { preencherSelectCategorias(); } catch(e) { console.error(e); }
+        try { preencherFiltroCategorias(); } catch(e) { console.error(e); }
+        try { renderizarCategorias(); } catch(e) { console.error(e); }
+        try { preencherSelectCategoriasRelatorio(); } catch(e) { console.error(e); }
     } catch (erro) {
         console.error('Erro ao carregar categorias:', erro);
     }
@@ -636,6 +636,10 @@ function mudarTab(tabName, e) {
 
     if (tabName === 'movimentacoes') {
         atualizarOpcoesQuantidade();
+    }
+
+    if (tabName === 'relatorio') {
+        preencherSelectCategoriasRelatorio();
     }
 }
 
