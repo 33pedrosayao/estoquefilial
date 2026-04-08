@@ -655,6 +655,7 @@ function inicializarRelatorio() {
 async function gerarRelatorio() {
     const inicio = document.getElementById('rel-inicio').value;
     const fim = document.getElementById('rel-fim').value;
+    const categoria = document.getElementById('rel-categoria').value;
 
     if (!inicio || !fim) {
         alert('Selecione o período do relatório.');
@@ -662,20 +663,22 @@ async function gerarRelatorio() {
     }
 
     try {
-        dadosRelatorio = await fazerRequisicao(`${API_URL}/itens/relatorio/?data_inicio=${inicio}&data_fim=${fim}`);
-        renderizarRelatorio(dadosRelatorio, inicio, fim);
+        const todos = await fazerRequisicao(`${API_URL}/itens/relatorio/?data_inicio=${inicio}&data_fim=${fim}`);
+        dadosRelatorio = categoria ? todos.filter(r => r.categoria === categoria) : todos;
+        renderizarRelatorio(dadosRelatorio, inicio, fim, categoria);
     } catch (erro) {
         alert('Erro ao gerar relatório: ' + erro.message);
     }
 }
 
-function renderizarRelatorio(dados, inicio, fim) {
+function renderizarRelatorio(dados, inicio, fim, categoria) {
     const totalEntradas = dados.reduce((s, r) => s + r.entradas, 0);
     const totalSaidas = dados.reduce((s, r) => s + r.saidas, 0);
     const itensComMov = dados.filter(r => r.entradas > 0 || r.saidas > 0).length;
 
     const fmtData = d => d.split('-').reverse().join('/');
-    document.getElementById('relatorio-titulo').textContent = 'Relatório de Estoque';
+    const titulo = categoria ? `Relatório de Estoque — ${categoria}` : 'Relatório de Estoque';
+    document.getElementById('relatorio-titulo').textContent = titulo;
     document.getElementById('relatorio-periodo').textContent = `Período: ${fmtData(inicio)} a ${fmtData(fim)}`;
 
     document.getElementById('res-entradas').textContent = totalEntradas;
@@ -700,7 +703,9 @@ function renderizarRelatorio(dados, inicio, fim) {
 function exportarPDF() {
     const inicio = document.getElementById('rel-inicio').value;
     const fim = document.getElementById('rel-fim').value;
+    const categoria = document.getElementById('rel-categoria').value;
     const fmtData = d => d.split('-').reverse().join('/');
+    const titulo = categoria ? `Relatório de Estoque — ${categoria}` : 'Relatório de Estoque';
 
     const totalEntradas = document.getElementById('res-entradas').textContent;
     const totalSaidas = document.getElementById('res-saidas').textContent;
@@ -734,7 +739,7 @@ function exportarPDF() {
             </style>
         </head>
         <body>
-            <h1>Relatório de Estoque</h1>
+            <h1>${titulo}</h1>
             <p class="periodo">Período: ${fmtData(inicio)} a ${fmtData(fim)}</p>
             <div class="cards">
                 <div class="card"><p>Total Entradas</p><h2 class="entrada">${totalEntradas}</h2></div>
@@ -772,7 +777,9 @@ function exportarCSV() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `relatorio_${inicio}_${fim}.csv`;
+    const categoria = document.getElementById('rel-categoria').value;
+    const sufixo = categoria ? `_${categoria.toLowerCase()}` : '';
+    a.download = `relatorio${sufixo}_${inicio}_${fim}.csv`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
