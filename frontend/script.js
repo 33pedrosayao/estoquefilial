@@ -11,6 +11,7 @@ let itemEditando = null;
 let usuarioEditando = null;
 
 // Elementos do DOM
+const selecaoPerfilContainer = document.getElementById('selecao-perfil-container');
 const loginContainer = document.getElementById('login-container');
 const dashboardContainer = document.getElementById('dashboard-container');
 const formLogin = document.getElementById('form-login');
@@ -61,21 +62,24 @@ function verificarAutenticacao() {
         mostrarDashboard();
         carregarDados();
     } else {
-        mostrarLogin();
+        mostrarSelecaoPerfil();
     }
 }
 
+function mostrarSelecaoPerfil() {
+    selecaoPerfilContainer.style.display = 'flex';
+    loginContainer.style.display = 'none';
+    dashboardContainer.style.display = 'none';
+}
+
 function mostrarLogin() {
+    selecaoPerfilContainer.style.display = 'none';
     loginContainer.style.display = 'flex';
     dashboardContainer.style.display = 'none';
 }
 
-function getPerfilNome(usuario) {
-    if (!usuario || !usuario.perfil) return '';
-    return typeof usuario.perfil === 'string' ? usuario.perfil : usuario.perfil.nome;
-}
-
 function mostrarDashboard() {
+    selecaoPerfilContainer.style.display = 'none';
     loginContainer.style.display = 'none';
     dashboardContainer.style.display = 'block';
 
@@ -89,6 +93,16 @@ function mostrarDashboard() {
     } else {
         tabUsuarios.style.display = 'none';
     }
+
+    const selectTipo = document.getElementById('mov-tipo');
+    if (perfilNome === 'operacional') {
+        selectTipo.innerHTML = '<option value="saida">Saída</option>';
+        selectTipo.disabled = true;
+    } else {
+        selectTipo.innerHTML = '<option value="entrada">Entrada</option><option value="saida">Saída</option>';
+        selectTipo.disabled = false;
+    }
+    atualizarOpcoesQuantidade();
 }
 
 async function fazerLogin(email, senha) {
@@ -129,11 +143,26 @@ function fazerLogout() {
     usuarioAtual = null;
     localStorage.removeItem('token');
     localStorage.removeItem('usuarioAtual');
-    mostrarLogin();
+    mostrarSelecaoPerfil();
 }
 
 // ===== EVENTOS =====
 function inicializarEventos() {
+    document.getElementById('btn-perfil-admin').addEventListener('click', mostrarLogin);
+
+    document.getElementById('btn-perfil-operacional').addEventListener('click', () => {
+        token = null;
+        usuarioAtual = { nome: 'Usuário Padrão', perfil: { nome: 'operacional' } };
+        mostrarDashboard();
+        carregarDados();
+    });
+
+    document.getElementById('btn-voltar-selecao').addEventListener('click', () => {
+        formLogin.reset();
+        document.getElementById('login-error').classList.remove('show');
+        mostrarSelecaoPerfil();
+    });
+
     formLogin.addEventListener('submit', async (e) => {
         e.preventDefault();
         const email = document.getElementById('login-email').value;
@@ -177,9 +206,12 @@ function inicializarEventos() {
 async function fazerRequisicao(url, opcoes = {}) {
     const headers = {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
         ...opcoes.headers
     };
+
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+    }
 
     const response = await fetch(url, {
         ...opcoes,
