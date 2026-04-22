@@ -504,23 +504,34 @@ body {
 }
 
 .btn-perfil-admin {
+    background: rgba(255, 255, 255, 0.15);
+    color: #555;
+    padding: 14px 20px;
+    font-size: 13px;
+}
+
+.btn-perfil-admin:hover {
+    background: #e0e0e0;
+}
+
+.btn-perfil-admin .perfil-icon {
+    font-size: 22px;
+    margin-bottom: 4px;
+}
+
+.btn-perfil-admin .perfil-label {
+    font-size: 13px;
+}
+
+.btn-perfil-operacional {
     background: #667eea;
     color: white;
 }
 
-.btn-perfil-admin:hover {
+.btn-perfil-operacional:hover {
     background: #5568d3;
     transform: translateY(-2px);
     box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-}
-
-.btn-perfil-operacional {
-    background: #f0f0f0;
-    color: #333;
-}
-
-.btn-perfil-operacional:hover {
-    background: #e0e0e0;
 }
 
 .perfil-icon {
