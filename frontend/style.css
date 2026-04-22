@@ -500,43 +500,42 @@ body {
     flex-direction: column;
     align-items: center;
     padding: 20px;
-    border-radius: 10px;
-    border: none;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    font-family: inherit;
-}
-
-.btn-perfil:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+    width: 100%;
 }
 
 .btn-perfil-admin {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: #667eea;
     color: white;
+}
+
+.btn-perfil-admin:hover {
+    background: #5568d3;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
 }
 
 .btn-perfil-operacional {
-    background: linear-gradient(135deg, #43a047 0%, #2e7d32 100%);
-    color: white;
+    background: #f0f0f0;
+    color: #333;
+}
+
+.btn-perfil-operacional:hover {
+    background: #e0e0e0;
 }
 
 .perfil-icon {
-    font-size: 32px;
-    margin-bottom: 8px;
+    font-size: 28px;
+    margin-bottom: 6px;
 }
 
 .perfil-label {
-    font-size: 16px;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-    margin-bottom: 4px;
+    font-size: 15px;
+    margin-bottom: 3px;
 }
 
 .perfil-desc {
     font-size: 12px;
-    opacity: 0.85;
+    opacity: 0.75;
 }
 
 .login-info {
